@@ -4,7 +4,8 @@
 # ---------------------------------------------------------------------------
 
 # --- Secrets (NEVER commit these) ---
-.env                      # real local secrets; only .env.example is committed
+# real local secrets live in .env (ignored); only .env.example is committed.
+.env
 *.pem
 *.key
 **/secrets/
