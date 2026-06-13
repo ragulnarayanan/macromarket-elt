@@ -60,22 +60,43 @@ az keyvault secret set --vault-name "$KEY_VAULT" --name snowflake-user     --val
 az keyvault secret set --vault-name "$KEY_VAULT" --name snowflake-password --value "REPLACE_ME"
 az keyvault secret set --vault-name "$KEY_VAULT" --name fred-api-key       --value "REPLACE_ME"
 
-echo "==> 5/6 Outputs you'll need for local dev + Snowflake stage"
+echo "==> 5/7 Outputs you'll need for local dev + Snowflake stage"
 echo "--- ADLS connection string (paste into .env as AZURE_STORAGE_CONNECTION_STRING) ---"
+# The Python uploader uses this to authenticate to ADLS from your laptop.
 az storage account show-connection-string \
   --name "$STORAGE_ACCOUNT" --resource-group "$RESOURCE_GROUP" --output tsv
 
-echo "--- SAS token (paste into snowflake/setup/06_adls_external_stage.sql) ---"
-# 'rl' = read + list. Snowflake only needs to READ files, never write them.
-az storage container generate-sas \
-  --account-name "$STORAGE_ACCOUNT" \
-  --name "$CONTAINER" \
-  --permissions rl \
-  --expiry 2027-12-31 \
-  --output tsv
+echo "--- Azure tenant ID (paste into snowflake/setup/06_...sql as AZURE_TENANT_ID) ---"
+# Not a secret — just an identifier for your Azure AD tenant. The Snowflake
+# storage integration needs it to know which directory to trust.
+az account show --query tenantId --output tsv
 
-echo "==> 6/6 Data Factory (orchestrator, configured in Phase 7)"
+echo "==> 6/7 Data Factory (orchestrator, configured in Phase 7)"
 az datafactory create --name "$DATA_FACTORY" --resource-group "$RESOURCE_GROUP" --location "$LOCATION"
 
 echo ""
-echo "DONE. Next: copy the connection string into .env and the SAS token into SQL file 06."
+echo "==> 7/7 (MANUAL, do AFTER Snowflake) Grant Snowflake's app read access"
+cat <<'NOTE'
+The storage integration uses an Azure AD app that Snowflake creates for you.
+You can only do this step AFTER running snowflake/setup/06_...sql, because
+Snowflake gives you the app name in the DESC STORAGE INTEGRATION output.
+
+  1. In Snowflake:  DESC STORAGE INTEGRATION azure_adls_integration;
+     - open AZURE_CONSENT_URL in a browser and click Accept
+     - copy AZURE_MULTI_TENANT_APP_NAME  (looks like:  <name>_<number>)
+
+  2. Find that app's service principal object id, then assign it read access:
+
+     APP_NAME="<paste AZURE_MULTI_TENANT_APP_NAME, the part before the underscore>"
+     SP_ID=$(az ad sp list --display-name "$APP_NAME" --query "[0].id" -o tsv)
+     STORAGE_ID=$(az storage account show -n macromarketelt -g rg-macromarket-elt --query id -o tsv)
+     az role assignment create \
+       --assignee "$SP_ID" \
+       --role "Storage Blob Data Reader" \
+       --scope "$STORAGE_ID"
+
+  3. Back in Snowflake:  LIST @MACROMARKET.BRONZE.adls_raw_stage;  (should succeed)
+NOTE
+
+echo ""
+echo "DONE. Next: copy the connection string into .env and the tenant ID into SQL file 06."
