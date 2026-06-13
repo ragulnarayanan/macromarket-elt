@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# .gitignore — files git must NEVER track.
+# The #1 job of this file: keep secrets and generated junk out of the repo.
+# ---------------------------------------------------------------------------
+
+# --- Secrets (NEVER commit these) ---
+.env                      # real local secrets; only .env.example is committed
+*.pem
+*.key
+**/secrets/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# --- dbt (all generated at build time, never source) ---
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+.user.yml
+
+# --- Local data files (raw extracts staged before upload) ---
+data/
+*.json.tmp
+extractors/output/
+
+# --- OS / editor cruft ---
+.DS_Store
+.idea/
+.vscode/
+*.swp

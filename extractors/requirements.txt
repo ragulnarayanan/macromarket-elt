@@ -1,0 +1,12 @@
+# Python dependencies for the extractors + loader + connectivity check.
+# Install with:  pip install -r extractors/requirements.txt
+
+yfinance>=0.2.36                      # Yahoo Finance stock prices + news
+requests>=2.31.0                      # REST calls (FRED, CoinGecko, Fear & Greed)
+snowflake-connector-python>=3.6.0     # Snowflake connection + COPY INTO
+azure-storage-file-datalake>=12.14.0  # ADLS Gen2 SDK (upload/list files)
+azure-identity>=1.15.0                # Azure auth (Key Vault in production)
+azure-keyvault-secrets>=4.8.0         # read secrets from Key Vault in production
+python-dotenv>=1.0.0                  # load .env for local development
+tenacity>=8.2.0                       # retry-with-backoff for flaky API calls
+structlog>=24.1.0                     # structured logging (timestamps, context)
