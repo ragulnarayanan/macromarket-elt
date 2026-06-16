@@ -1,0 +1,7 @@
+# Streamlit dashboard dependencies.
+# Install with:  pip install -r streamlit/requirements.txt
+streamlit>=1.33.0
+plotly>=5.20.0                      # interactive charts (gauge, heatmap, bar, line)
+pandas>=2.0.0
+snowflake-connector-python>=3.6.0  # Gold-layer reads (REPORTER role)
+python-dotenv>=1.0.0

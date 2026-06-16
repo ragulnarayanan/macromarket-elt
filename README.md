@@ -49,7 +49,7 @@ dbt Core · MCP · Streamlit
 - [x] Phase 4 — dbt Gold ✅ *(dims, intermediate technicals/macro, incremental snapshot, regime + Python correlation model)*
 - [x] Phase 5 — MCP server ✅ *(5 read-only Gold tools via FastMCP, REPORTER role)*
 - [x] Phase 6 — Azure Data Factory orchestration ✅ *(linked services, daily + backfill pipelines, 5PM trigger — importable JSON + deploy guide)*
-- [ ] Phase 7 — Streamlit dashboard
+- [x] Phase 7 — Streamlit dashboard ✅ *(4 pages: market overview, sector heatmap, macro correlations, regime analysis — REPORTER role)*
 - [ ] Phase 8 — CI/CD + polish
 
 ## Quick start (local dev)
