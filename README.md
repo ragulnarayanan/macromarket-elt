@@ -14,6 +14,11 @@
 ![MCP](https://img.shields.io/badge/MCP-server-black)
 ![Streamlit](https://img.shields.io/badge/Streamlit-dashboard-FF4B4B?logo=streamlit&logoColor=white)
 
+**🔗 Links:** [Live docs & dbt lineage](https://ragulnarayanan.github.io/macromarket-elt/) ·
+[dbt documentation](https://ragulnarayanan.github.io/macromarket-elt/dbt/) ·
+[MCP demo transcript](docs/mcp_demo.md) ·
+[Sample Gold data](docs/sample_output/)
+
 ---
 
 ## Architecture
