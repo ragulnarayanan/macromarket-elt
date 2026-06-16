@@ -9,6 +9,9 @@
 *.pem
 *.key
 **/secrets/
+# locally-filled SQL copies that contain a real SAS token (e.g.
+# 06_adls_external_stage.local.sql). Committed *.sql files keep placeholders.
+**/*.local.sql
 
 # --- Python ---
 __pycache__/

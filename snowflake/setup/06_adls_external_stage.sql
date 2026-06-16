@@ -2,65 +2,39 @@
 -- 06_adls_external_stage.sql
 --
 -- WHAT: Creates a JSON file format and an EXTERNAL STAGE pointing at the ADLS
---       Gen2 container — using a STORAGE INTEGRATION (Azure AD identity), so
---       NO credential is ever stored in this file. Safe to commit to a public repo.
--- WHY:  An "external stage" is a named pointer to a cloud storage location.
---       Once it exists, the loader runs:
+--       Gen2 container, authenticated with a SAS token.
+-- WHY:  An "external stage" is a named pointer to a cloud storage location plus
+--       the credentials to read it. Once it exists, the loader runs:
 --           COPY INTO bronze.raw_stock_prices
 --           FROM @adls_raw_stage/stock-prices/2026-06-13.json;
 --       and Snowflake pulls the file straight from ADLS — no data flows through
 --       your laptop.
 --
--- WHY STORAGE INTEGRATION (instead of a SAS token):
---   Snowflake registers itself as an app in YOUR Azure Active Directory. You
---   consent to it once and grant it read access on the storage account. After
---   that, Snowflake authenticates to ADLS as that identity — there is no token
---   or key to paste, leak, or rotate. This is the production best practice and
---   keeps secrets entirely out of source control.
+-- WHY SAS (and not a storage integration)?
+--   A storage integration requires consenting a Snowflake app into your Azure
+--   AD directory — which a locked-down student/university tenant won't allow
+--   without IT admin approval. A SAS (Shared Access Signature) token is
+--   generated from your storage account's OWN access keys and needs NO directory
+--   permissions or admin consent. It's the pragmatic choice here.
 --
 -- KEY CONCEPTS:
---   STORAGE INTEGRATION  account-level object holding the Azure AD trust + the
---                        list of allowed storage locations. ACCOUNTADMIN-owned.
---   FILE FORMAT          reusable parsing rules. STRIP_OUTER_ARRAY = TRUE turns
---                        a top-level JSON array [ {...}, {...} ] into one ROW per
---                        element (so each record becomes its own Bronze row).
+--   SAS TOKEN    a scoped, EXPIRING credential string (starts with "sv=") that
+--                grants specific permissions (we use read + list) on the
+--                container — without exposing your account key.
+--   FILE FORMAT  reusable parsing rules. STRIP_OUTER_ARRAY = TRUE turns a
+--                top-level JSON array [ {...}, {...} ] into one ROW per element.
 --
--- BEFORE RUNNING: replace <YOUR_AZURE_TENANT_ID> below. Get it with:
---                     az account show --query tenantId --output tsv
---                 (The tenant ID is an identifier, not a secret — safe to keep.)
+-- ⚠️ SECURITY — THE REPO IS PUBLIC:
+--   DO NOT paste your real SAS token into THIS file and commit it. Instead,
+--   either (a) paste the token directly into the Snowflake worksheet when you
+--   run this, leaving this committed file with its placeholder; or (b) copy
+--   this to "06_adls_external_stage.local.sql" (gitignored) and edit that.
+--   The token string starts at "sv=" — paste everything from "sv=" onward,
+--   with NO leading "?".
+--
+-- RUN AS: SYSADMIN (owns the BRONZE schema where the stage lives).
 -- ===========================================================================
 
--- ===========================================================================
--- STEP 1 — Create the storage integration (ACCOUNTADMIN only).
--- ===========================================================================
-USE ROLE ACCOUNTADMIN;
-
-CREATE STORAGE INTEGRATION IF NOT EXISTS azure_adls_integration
-  TYPE = EXTERNAL_STAGE
-  STORAGE_PROVIDER = 'AZURE'
-  ENABLED = TRUE
-  AZURE_TENANT_ID = '<YOUR_AZURE_TENANT_ID>'
-  -- Snowflake may ONLY read from locations listed here (least privilege).
-  STORAGE_ALLOWED_LOCATIONS = ('azure://macromarketelt.blob.core.windows.net/raw-data');
-
--- ===========================================================================
--- STEP 2 — Consent + grant in Azure (manual, one time).
---   Run DESCRIBE, then from the output:
---     a) AZURE_CONSENT_URL          -> open in a browser, click Accept. This
---                                      adds Snowflake's app to YOUR Azure AD.
---     b) AZURE_MULTI_TENANT_APP_NAME -> the app's name. In Azure, assign it the
---                                      "Storage Blob Data Reader" role on the
---                                      storage account so it can read files.
---        (The exact az command is in azure/setup.sh, Step 7.)
--- ===========================================================================
-DESC STORAGE INTEGRATION azure_adls_integration;
-
--- Let SYSADMIN (which owns the BRONZE schema + stage) use the integration.
-GRANT USAGE ON INTEGRATION azure_adls_integration TO ROLE SYSADMIN;
-
--- ===========================================================================
--- STEP 3 — Create the file format + stage (SYSADMIN owns the BRONZE schema).
--- ===========================================================================
 USE ROLE SYSADMIN;
 USE SCHEMA MACROMARKET.BRONZE;
 
@@ -71,18 +45,18 @@ CREATE FILE FORMAT IF NOT EXISTS MACROMARKET.BRONZE.json_format
   COMPRESSION = 'AUTO';
 
 -- The pointer to your ADLS Gen2 container "raw-data".
--- Note: NO credentials here — auth comes from the storage integration.
+-- NOTE: the URL uses azure://<account>.blob.core.windows.net/<container>.
+-- If you named your storage account something other than "macromarketelt",
+-- update the host below to match.
 CREATE STAGE IF NOT EXISTS MACROMARKET.BRONZE.adls_raw_stage
-  STORAGE_INTEGRATION = azure_adls_integration
   URL = 'azure://macromarketelt.blob.core.windows.net/raw-data'
+  CREDENTIALS = (AZURE_SAS_TOKEN = '<PASTE_YOUR_SAS_TOKEN_HERE>')  -- starts with sv=...
   FILE_FORMAT = MACROMARKET.BRONZE.json_format;
 
 -- The LOADER role runs COPY INTO, so it needs to USE the stage + file format.
 GRANT USAGE ON STAGE       MACROMARKET.BRONZE.adls_raw_stage TO ROLE LOADER;
 GRANT USAGE ON FILE FORMAT MACROMARKET.BRONZE.json_format    TO ROLE LOADER;
 
--- ===========================================================================
--- STEP 4 — Verify Snowflake can read your ADLS files (proves the integration
--- + role assignment work). 0 files is fine before any data is uploaded.
--- ===========================================================================
+-- Verify Snowflake can read your ADLS files (proves the SAS token + URL work).
+-- 0 files is fine before any data is uploaded; a credential/URL error fails here.
 LIST @MACROMARKET.BRONZE.adls_raw_stage;
