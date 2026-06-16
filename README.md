@@ -58,6 +58,20 @@ flowchart LR
 | [CoinGecko](https://www.coingecko.com/en/api) | Top-20 crypto by market cap | REST API |
 | [Fear & Greed](https://alternative.me/crypto/fear-and-greed-index/) | CNN Fear & Greed index (0–100) | REST API |
 
+## Dashboard (sample visuals)
+
+Rendered from the live Gold layer (Streamlit + Plotly). Source pages in `streamlit/`.
+
+| Fear & Greed | S&P 500 trend |
+|:---:|:---:|
+| ![Fear & Greed](docs/images/fear_greed_gauge.png) | ![S&P 500](docs/images/sp500_trend.png) |
+
+![Sector heatmap](docs/images/sector_heatmap.png)
+
+| Asset × macro correlation | Returns by macro regime |
+|:---:|:---:|
+| ![Correlations](docs/images/macro_correlations.png) | ![Regimes](docs/images/regime_analysis.png) |
+
 ## Tech stack
 
 **Python** · **Snowflake** · **dbt Core** (dbt-snowflake) · **Azure** (ADLS Gen2, Data
