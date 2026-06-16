@@ -1,0 +1,13 @@
+# Ruff configuration — Python linter/formatter rules for CI + local use.
+line-length = 100
+target-version = "py311"
+
+[lint]
+# E/W pycodestyle, F pyflakes, I import-sorting, UP pyupgrade, B bugbear.
+select = ["E", "W", "F", "I", "UP", "B"]
+# Long lines (often annotated SQL/strings) are not worth failing CI over.
+ignore = ["E501"]
+
+[lint.per-file-ignores]
+# dbt Python models use an injected `dbt`/`session` and Snowpark idioms.
+"dbt_project/**" = ["F821"]

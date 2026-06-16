@@ -1,0 +1,11 @@
+TICKER,COMPANY_NAME,YAHOO_SECTOR,GICS_SECTOR,INDUSTRY,MARKET_CAP,PE_RATIO
+AAPL,Apple Inc.,Technology,Information Technology,Consumer Electronics,4406353854464,36.276905
+AMZN,Amazon.com Inc.,Consumer Cyclical,Consumer Discretionary,Internet Retail,2643503874048,31.627388
+GOOGL,Alphabet Inc.,Communication Services,Communication Services,Internet Content & Information,4529350770688,28.312738
+JNJ,Johnson & Johnson,Healthcare,Health Care,Drug Manufacturers - General,566297755648,27.25956
+JPM,JPMorgan Chase & Co.,Financial Services,Financials,Banks - Diversified,885149532160,15.813304
+META,Meta Platforms Inc.,Communication Services,Communication Services,Internet Content & Information,1512418312192,21.681591
+MSFT,Microsoft Corporation,Technology,Information Technology,Software - Infrastructure,2905119653888,23.292494
+NVDA,NVIDIA Corporation,Technology,Information Technology,Semiconductors,5061462196224,32.050613
+TSLA,Tesla Inc.,Consumer Cyclical,Consumer Discretionary,Auto Manufacturers,1515641110528,363.56305
+XOM,Exxon Mobil Corporation,Energy,Energy,Oil & Gas Integrated,583981596672,23.678991

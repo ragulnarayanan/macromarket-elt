@@ -29,19 +29,22 @@ models:
     description: "Daily average return per sector."
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [gics_sector, price_date]
+          arguments:
+            combination_of_columns: [gics_sector, price_date]
 
   - name: fct_regime_analysis
     description: "Average asset returns per macro regime."
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [rate_regime, vol_regime]
+          arguments:
+            combination_of_columns: [rate_regime, vol_regime]
 
   - name: fct_asset_prices
     description: "Per-asset daily prices, returns, and technicals (REPORTER-readable)."
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [asset_type, asset_id, price_date]
+          arguments:
+            combination_of_columns: [asset_type, asset_id, price_date]
     columns:
       - name: asset_id
         tests: [not_null]
@@ -50,8 +53,13 @@ models:
     description: "Pearson correlation between asset returns and macro indicators."
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [asset, macro_indicator]
+          arguments:
+            combination_of_columns: [asset, macro_indicator]
     columns:
       - name: correlation
         tests:
-          - dbt_utils.accepted_range: {min_value: -1, max_value: 1, inclusive: true}
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -1
+                max_value: 1
+                inclusive: true

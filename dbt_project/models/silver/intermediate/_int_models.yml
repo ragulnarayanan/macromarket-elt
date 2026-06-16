@@ -5,14 +5,19 @@ models:
     description: "Daily prices + returns, moving averages, RSI-14, Bollinger Bands."
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [ticker, price_date]
+          arguments:
+            combination_of_columns: [ticker, price_date]
     columns:
       - name: ticker
         tests: [not_null]
       - name: rsi_14
         description: "0-100 momentum oscillator (null when no losses in window)."
         tests:
-          - dbt_utils.accepted_range: {min_value: 0, max_value: 100, inclusive: true}
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
 
   - name: int_macro_pivot
     description: "FRED indicators pivoted wide, one row per date."
@@ -30,17 +35,23 @@ models:
     description: "Crypto prices + market-cap dominance %."
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [coin_id, price_date]
+          arguments:
+            combination_of_columns: [coin_id, price_date]
     columns:
       - name: dominance_pct
         tests:
-          - dbt_utils.accepted_range: {min_value: 0, max_value: 100, inclusive: true}
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
 
   - name: int_asset_daily_returns
     description: "Unified daily returns across stocks + crypto."
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [asset_type, asset_id, asset_date]
+          arguments:
+            combination_of_columns: [asset_type, asset_id, asset_date]
     columns:
       - name: asset_id
         tests: [not_null]

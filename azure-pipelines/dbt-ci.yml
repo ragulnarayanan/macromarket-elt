@@ -1,0 +1,47 @@
+# ===========================================================================
+# dbt-ci.yml — Azure DevOps pipeline: validate dbt models on pull requests.
+#
+# On a PR that touches dbt_project/, this spins up a clean runner, installs dbt,
+# and runs `dbt build` against the CI target (a separate MACROMARKET_CI database)
+# so models + tests are validated BEFORE merge — never against prod.
+#
+# Secrets (SF_ACCOUNT / SF_USER / SF_PASSWORD) come from an Azure DevOps variable
+# group or pipeline secret variables, NOT the repo.
+#
+# Prereqs: a MACROMARKET_CI database the TRANSFORMER role can write to (the `ci`
+# target in dbt_project/profiles.yml). For an even leaner CI, use Slim CI:
+#   dbt build --select state:modified+ --defer --state ./prod-manifest
+# (requires publishing the production manifest as a pipeline artifact).
+# ===========================================================================
+
+trigger: none          # PR-only; don't run on direct pushes
+
+pr:
+  branches:
+    include: [main]
+  paths:
+    include: ['dbt_project/**']
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  DBT_PROFILES_DIR: $(Build.SourcesDirectory)/dbt_project
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.11'
+
+  - script: pip install dbt-snowflake
+    displayName: 'Install dbt'
+
+  - script: |
+      cd dbt_project
+      dbt deps
+      dbt build --target ci
+    displayName: 'dbt build (CI target)'
+    env:
+      SF_ACCOUNT: $(SF_ACCOUNT)
+      SF_USER: $(SF_USER)
+      SF_PASSWORD: $(SF_PASSWORD)

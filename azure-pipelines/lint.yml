@@ -1,0 +1,25 @@
+# ===========================================================================
+# lint.yml — Azure DevOps pipeline: lint Python on every push/PR to main.
+# Fast, dependency-light gate that keeps the Python code style consistent.
+# ===========================================================================
+
+trigger:
+  branches:
+    include: [main]
+pr:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.11'
+
+  - script: pip install ruff
+    displayName: 'Install ruff'
+
+  - script: ruff check extractors mcp_server streamlit
+    displayName: 'Lint Python (ruff)'
