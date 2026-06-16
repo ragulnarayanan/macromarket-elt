@@ -65,11 +65,13 @@ def load_all() -> None:
         for subdir, table in SUBDIR_TO_TABLE.items():
             cur.execute(_copy_sql(subdir, table))
             rows = cur.fetchall()
-            # COPY INTO returns one result row per file loaded; sum rows_loaded
-            # (4th column) across them. Empty result = nothing new to load.
-            loaded = sum(r[3] for r in rows) if rows else 0
+            # COPY INTO returns one wide row per file loaded (rows_loaded at index
+            # 3). When nothing new is loaded it returns a single short status row
+            # instead — so only count rows that actually have the per-file shape.
+            file_rows = [r for r in rows if len(r) > 3]
+            loaded = sum(r[3] for r in file_rows)
             total += loaded
-            log.info("copied", table=table, files=len(rows), rows_loaded=loaded)
+            log.info("copied", table=table, files=len(file_rows), rows_loaded=loaded)
         log.info("load_complete", total_rows=total)
         cur.close()
     finally:
