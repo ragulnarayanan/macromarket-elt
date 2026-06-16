@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: dim_tickers
+    description: "Ticker dimension: identity, sector, latest fundamentals."
+    columns:
+      - name: ticker
+        tests: [not_null, unique]
+
+  - name: dim_macro_indicators
+    description: "FRED series metadata dimension."
+    columns:
+      - name: series_id
+        tests: [not_null, unique]
+
+  - name: dim_sectors
+    description: "GICS sector dimension."
+    columns:
+      - name: gics_sector
+        tests: [not_null, unique]
+
+  - name: fct_daily_market_snapshot
+    description: "One row per trading day: equities, crypto, sentiment, macro."
+    columns:
+      - name: snapshot_date
+        tests: [not_null, unique]
+
+  - name: fct_sector_performance
+    description: "Daily average return per sector."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [gics_sector, price_date]
+
+  - name: fct_regime_analysis
+    description: "Average asset returns per macro regime."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [rate_regime, vol_regime]
+
+  - name: fct_macro_asset_correlation
+    description: "Pearson correlation between asset returns and macro indicators."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [asset, macro_indicator]
+    columns:
+      - name: correlation
+        tests:
+          - dbt_utils.accepted_range: {min_value: -1, max_value: 1, inclusive: true}
