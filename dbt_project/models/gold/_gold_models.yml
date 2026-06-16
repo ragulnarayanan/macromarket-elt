@@ -37,6 +37,15 @@ models:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [rate_regime, vol_regime]
 
+  - name: fct_asset_prices
+    description: "Per-asset daily prices, returns, and technicals (REPORTER-readable)."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [asset_type, asset_id, price_date]
+    columns:
+      - name: asset_id
+        tests: [not_null]
+
   - name: fct_macro_asset_correlation
     description: "Pearson correlation between asset returns and macro indicators."
     tests:

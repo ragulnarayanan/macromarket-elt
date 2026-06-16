@@ -1,0 +1,5 @@
+# MCP server dependencies.
+# Install with:  pip install -r mcp_server/requirements.txt
+mcp>=1.2.0                          # Model Context Protocol SDK (includes FastMCP)
+snowflake-connector-python>=3.6.0   # Gold-layer queries (REPORTER role)
+python-dotenv>=1.0.0                # load .env for local dev

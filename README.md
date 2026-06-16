@@ -47,7 +47,7 @@ dbt Core · MCP · Streamlit
 - [x] Phase 2 — Extractors + Bronze load ✅ *(verified end-to-end: extract → ADLS → COPY INTO Bronze)*
 - [x] Phase 3 — dbt Silver ✅ *(6 staging models, 3 seeds, 18 passing tests)*
 - [x] Phase 4 — dbt Gold ✅ *(dims, intermediate technicals/macro, incremental snapshot, regime + Python correlation model)*
-- [ ] Phase 5 — MCP server
+- [x] Phase 5 — MCP server ✅ *(5 read-only Gold tools via FastMCP, REPORTER role)*
 - [ ] Phase 6 — Azure Data Factory orchestration
 - [ ] Phase 7 — Streamlit dashboard
 - [ ] Phase 8 — CI/CD + polish

@@ -1,0 +1,21 @@
+{
+  "//": "Example Claude Desktop MCP config for the MacroMarket server.",
+  "//1": "Copy the 'macromarket' block into your real config at:",
+  "//2": "  macOS: ~/Library/Application Support/Claude/claude_desktop_config.json",
+  "//3": "Use ABSOLUTE paths. Fill in real Snowflake values (these are REPORTER creds).",
+  "//4": "Restart Claude Desktop after editing. Then ask: 'What's today's market snapshot?'",
+  "mcpServers": {
+    "macromarket": {
+      "command": "/Users/rana/Projects/macromarket-elt/.venv/bin/python",
+      "args": ["/Users/rana/Projects/macromarket-elt/mcp_server/server.py"],
+      "env": {
+        "SF_ACCOUNT": "your_account_identifier",
+        "SF_USER": "your_user",
+        "SF_PASSWORD": "your_password",
+        "MCP_SF_ROLE": "REPORTER",
+        "MCP_SF_WAREHOUSE": "REPORTER_WH",
+        "SF_DATABASE": "MACROMARKET"
+      }
+    }
+  }
+}
