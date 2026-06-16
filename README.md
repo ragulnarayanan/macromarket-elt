@@ -128,17 +128,4 @@ python ../mcp_server/server.py             # MCP server (or wire into Claude Des
 - **ADF over Airflow** — Azure-native, no infra to manage, native Snowflake/ADLS connectors,
   pay-per-run.
 
-## Build status
 
-- [x] **Phase 1** — Foundation (Azure + Snowflake setup)
-- [x] **Phase 2** — Extractors + Bronze load *(verified: extract → ADLS → COPY INTO)*
-- [x] **Phase 3** — dbt Silver *(6 staging models, 3 seeds, tests)*
-- [x] **Phase 4** — dbt Gold *(dims, technicals, incremental snapshot, regime, Python correlation model)*
-- [x] **Phase 5** — MCP server *(5 read-only Gold tools)*
-- [x] **Phase 6** — Azure Data Factory orchestration *(pipelines + trigger as code)*
-- [x] **Phase 7** — Streamlit dashboard *(4 pages)*
-- [x] **Phase 8** — CI/CD + polish
-
-> Sample Gold outputs are in [`docs/sample_output/`](docs/sample_output/). Detailed specs
-> live in `MACROMARKET_ELT_PROJECT_SPEC.md`. Cost: ~\$0 on Snowflake + Azure free tiers
-> (X-Small warehouses, 60s auto-suspend, 10-credit resource monitor).
