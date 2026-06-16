@@ -1,5 +1,14 @@
 # MacroMarket ELT Pipeline — Complete Project Specification
 
+> ⚠️ **SCOPE CHANGE (2026-06-16): Databricks + sentiment enrichment REMOVED.**
+> Azure Databricks, PySpark, FinBERT, and the entire financial-sentiment feature
+> are no longer part of this project. Ignore all Databricks/sentiment content
+> below (notably Section 8, the `news-headlines` source in 3.5, the
+> `databricks/` repo dir, `fct_sentiment_enriched`, the `get_sentiment` MCP tool,
+> and the Streamlit "Sentiment Tracker" page). The authoritative, up-to-date
+> scope lives in `CLAUDE.md` and `README.md`. Data sources are now **4**
+> (Yahoo Finance, FRED, CoinGecko, Fear & Greed) and the build is **8 phases**.
+
 ## IMPORTANT: Instructions for Claude Code
 
 **You are building this project WITH the developer (Rana). At every stage:**
@@ -1218,21 +1227,14 @@ macromarket-elt/
 27. Write custom singular tests
 28. Run full `dbt build`, verify Gold layer
 
-### Phase 5: Databricks Enrichment (Day 15-17)
-29. Set up Databricks workspace + single-node cluster
-30. Build `sentiment_enrichment.py` notebook
-31. Test: read from Snowflake Silver → run FinBERT → write to Snowflake Gold
-32. Build `fct_sentiment_enriched.sql` in dbt (joins sentiment with market data)
-33. Run full pipeline: dbt Gold + Databricks + sentiment model
-
-### Phase 6: MCP Server (Day 18-20)
+### Phase 5: MCP Server (Day 18-20)
 34. Build Snowflake client with connection pooling (REPORTER role)
 35. Implement `get_market_snapshot` tool
 36. Implement remaining tools including `get_sentiment`
 37. Test with Claude Desktop locally
 38. Screenshot demo interactions
 
-### Phase 7: Azure Data Factory (Day 21-23)
+### Phase 6: Azure Data Factory (Day 21-23)
 39. Create ADF linked services (ADLS, Snowflake, Key Vault, Databricks)
 40. Build `pl_daily_elt` pipeline (visual designer)
 41. Build `pl_backfill` pipeline
@@ -1240,12 +1242,12 @@ macromarket-elt/
 43. Test end-to-end pipeline run via ADF
 44. Screenshot ADF pipeline monitor (success run)
 
-### Phase 8: Streamlit Dashboard (Day 24-25)
+### Phase 7: Streamlit Dashboard (Day 24-25)
 45. Build Market Overview page
 46. Build remaining pages including Sentiment Tracker
 47. Connect via REPORTER role
 
-### Phase 9: CI/CD + Polish (Day 26-28)
+### Phase 8: CI/CD + Polish (Day 26-28)
 48. Set up Azure DevOps project + pipelines
 49. Configure dbt CI on PRs
 50. Configure linting pipeline

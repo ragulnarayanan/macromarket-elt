@@ -25,7 +25,6 @@ from extractors.fear_greed import FearGreedExtractor
 from extractors.fred import FredExtractor
 from extractors.utils import get_logger, today
 from extractors.yahoo_finance import YahooFundamentalsExtractor, YahooPricesExtractor
-from extractors.yahoo_news import YahooNewsExtractor
 
 log = get_logger("run_all")
 
@@ -33,7 +32,6 @@ log = get_logger("run_all")
 EXTRACTORS: list[type[BaseExtractor]] = [
     YahooPricesExtractor,
     YahooFundamentalsExtractor,
-    YahooNewsExtractor,
     FredExtractor,
     CoinGeckoExtractor,
     FearGreedExtractor,

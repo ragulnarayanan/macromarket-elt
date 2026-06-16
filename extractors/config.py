@@ -51,7 +51,7 @@ SECTOR_ETFS: list[str] = [
     "XLP", "XLI", "XLB", "XLRE", "XLU", "XLC",
 ]
 
-# Everything Yahoo price/news extractors iterate over.
+# Everything the Yahoo price extractor iterates over.
 ALL_YAHOO_SYMBOLS: list[str] = STOCK_TICKERS + INDICES + SECTOR_ETFS
 
 # FRED macroeconomic series (id -> human label, used as metadata in Bronze).

@@ -6,7 +6,7 @@
 --       the pipeline runs as a role scoped to exactly what it does:
 --
 --         LOADER       writes BRONZE only          (ADF COPY INTO)
---         TRANSFORMER  reads BRONZE, writes SILVER+GOLD  (dbt + Databricks)
+--         TRANSFORMER  reads BRONZE, writes SILVER+GOLD  (dbt)
 --         REPORTER     reads GOLD only             (MCP server + Streamlit)
 --
 --       If the REPORTER credential leaks, the attacker can read Gold but can't
@@ -14,7 +14,7 @@
 --       mean by "RBAC."
 --
 -- KEY CONCEPT — "FUTURE" grants:
---   dbt and Databricks CREATE NEW TABLES every run. A normal grant only covers
+--   dbt CREATEs NEW TABLES every run. A normal grant only covers
 --   tables that exist TODAY. "GRANT ... ON FUTURE TABLES" automatically applies
 --   the same access to tables created LATER, so you never re-grant by hand.
 --

@@ -1,7 +1,7 @@
 # Python dependencies for the extractors + loader + connectivity check.
 # Install with:  pip install -r extractors/requirements.txt
 
-yfinance>=0.2.36                      # Yahoo Finance stock prices + news
+yfinance>=0.2.36                      # Yahoo Finance stock prices + fundamentals
 requests>=2.31.0                      # REST calls (FRED, CoinGecko, Fear & Greed)
 snowflake-connector-python>=3.6.0     # Snowflake connection + COPY INTO
 azure-storage-file-datalake>=12.14.0  # ADLS Gen2 SDK (upload/list files)

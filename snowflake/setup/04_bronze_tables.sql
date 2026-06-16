@@ -68,12 +68,4 @@ CREATE TABLE IF NOT EXISTS raw_fear_greed (
     _file_name  VARCHAR(500)
 );
 
--- News headlines (later fed to Databricks FinBERT) from Yahoo Finance.
-CREATE TABLE IF NOT EXISTS raw_news_headlines (
-    raw_data    VARIANT,
-    source      VARCHAR(50)   DEFAULT 'yahoo_finance_news',
-    _loaded_at  TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
-    _file_name  VARCHAR(500)
-);
-
 SHOW TABLES IN SCHEMA MACROMARKET.BRONZE;

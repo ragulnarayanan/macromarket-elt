@@ -37,7 +37,6 @@ SUBDIR_TO_TABLE: dict[str, str] = {
     "fred-series": "raw_fred_series",
     "crypto-prices": "raw_crypto_prices",
     "fear-greed": "raw_fear_greed",
-    "news-headlines": "raw_news_headlines",
 }
 
 STAGE = "MACROMARKET.BRONZE.adls_raw_stage"

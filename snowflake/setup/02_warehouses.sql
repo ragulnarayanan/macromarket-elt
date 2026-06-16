@@ -26,7 +26,7 @@ CREATE WAREHOUSE IF NOT EXISTS LOADER_WH
        AUTO_RESUME = TRUE
        INITIALLY_SUSPENDED = TRUE;
 
--- Compute for dbt + Databricks transformations (used by the TRANSFORMER role).
+-- Compute for dbt transformations (used by the TRANSFORMER role).
 CREATE WAREHOUSE IF NOT EXISTS TRANSFORMER_WH
   WITH WAREHOUSE_SIZE = 'X-SMALL'
        AUTO_SUSPEND = 60

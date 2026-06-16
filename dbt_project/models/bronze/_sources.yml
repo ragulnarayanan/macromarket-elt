@@ -41,5 +41,3 @@ sources:
         description: "Top-N crypto daily snapshot (CoinGecko)."
       - name: raw_fear_greed
         description: "CNN Fear & Greed index daily reading (alternative.me)."
-      - name: raw_news_headlines
-        description: "News headlines per ticker (Yahoo) — input to FinBERT in Phase 5."
