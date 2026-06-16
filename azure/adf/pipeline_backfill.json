@@ -1,0 +1,65 @@
+{
+  "name": "pl_backfill",
+  "properties": {
+    "description": "Historical backfill: same flow as pl_daily_elt but over a date RANGE. Run manually (Trigger Now) with start_date/end_date to load history, then build dbt once at the end.",
+    "parameters": {
+      "start_date": { "type": "string", "defaultValue": "2026-01-01" },
+      "end_date": { "type": "string", "defaultValue": "2026-06-16" }
+    },
+    "activities": [
+      {
+        "name": "extract_range_and_upload",
+        "type": "WebActivity",
+        "description": "Run extractors over [start_date, end_date] and upload to ADLS (extractors.run_all --start --end --upload).",
+        "policy": { "timeout": "0.02:00:00", "retry": 2, "retryIntervalInSeconds": 60 },
+        "typeProperties": {
+          "url": "https://<elt-runner-host>/extract",
+          "method": "POST",
+          "headers": { "Content-Type": "application/json" },
+          "body": {
+            "start_date": "@pipeline().parameters.start_date",
+            "end_date": "@pipeline().parameters.end_date",
+            "mode": "backfill"
+          }
+        }
+      },
+      {
+        "name": "snowflake_copy_into",
+        "type": "Script",
+        "description": "Load all staged Bronze files via COPY INTO (load history skips files already loaded).",
+        "linkedServiceName": {
+          "referenceName": "ls_snowflake",
+          "type": "LinkedServiceReference"
+        },
+        "dependsOn": [
+          { "activity": "extract_range_and_upload", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "scripts": [
+            { "type": "Query", "text": "COPY INTO MACROMARKET.BRONZE.raw_stock_prices (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/stock-prices/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';" },
+            { "type": "Query", "text": "COPY INTO MACROMARKET.BRONZE.raw_stock_fundamentals (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/stock-fundamentals/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';" },
+            { "type": "Query", "text": "COPY INTO MACROMARKET.BRONZE.raw_fred_series (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/fred-series/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';" },
+            { "type": "Query", "text": "COPY INTO MACROMARKET.BRONZE.raw_crypto_prices (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/crypto-prices/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';" },
+            { "type": "Query", "text": "COPY INTO MACROMARKET.BRONZE.raw_fear_greed (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/fear-greed/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';" }
+          ]
+        }
+      },
+      {
+        "name": "dbt_build",
+        "type": "WebActivity",
+        "description": "dbt build — runs + tests every model (staging -> intermediate -> gold) in one shot.",
+        "policy": { "timeout": "0.01:00:00", "retry": 1, "retryIntervalInSeconds": 30 },
+        "dependsOn": [
+          { "activity": "snowflake_copy_into", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "url": "https://<elt-runner-host>/dbt",
+          "method": "POST",
+          "headers": { "Content-Type": "application/json" },
+          "body": { "command": "build" }
+        }
+      }
+    ],
+    "annotations": ["macromarket", "backfill", "elt"]
+  }
+}

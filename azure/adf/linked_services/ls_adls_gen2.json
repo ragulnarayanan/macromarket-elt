@@ -1,0 +1,18 @@
+{
+  "name": "ls_adls_gen2",
+  "properties": {
+    "type": "AzureBlobFS",
+    "description": "ADLS Gen2 storage account (macromarket). AzureBlobFS = the data-lake filesystem connector. Account key pulled from Key Vault at runtime (secret 'adls-account-key'). Used by extract/load activities to reach the raw-data container.",
+    "typeProperties": {
+      "url": "https://macromarket.dfs.core.windows.net",
+      "accountKey": {
+        "type": "AzureKeyVaultSecret",
+        "store": {
+          "referenceName": "ls_keyvault",
+          "type": "LinkedServiceReference"
+        },
+        "secretName": "adls-account-key"
+      }
+    }
+  }
+}

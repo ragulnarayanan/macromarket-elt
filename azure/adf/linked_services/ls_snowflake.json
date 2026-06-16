@@ -1,0 +1,18 @@
+{
+  "name": "ls_snowflake",
+  "properties": {
+    "type": "Snowflake",
+    "description": "Snowflake connection for the COPY INTO Script activity. Connects as LOADER / LOADER_WH (Bronze write only). Password from Key Vault (secret 'snowflake-password'). Replace <account_identifier> with your Snowflake account (e.g. abc12345.us-east-1).",
+    "typeProperties": {
+      "connectionString": "jdbc:snowflake://<account_identifier>.snowflakecomputing.com/?user=<sf_user>&db=MACROMARKET&warehouse=LOADER_WH&role=LOADER",
+      "password": {
+        "type": "AzureKeyVaultSecret",
+        "store": {
+          "referenceName": "ls_keyvault",
+          "type": "LinkedServiceReference"
+        },
+        "secretName": "snowflake-password"
+      }
+    }
+  }
+}

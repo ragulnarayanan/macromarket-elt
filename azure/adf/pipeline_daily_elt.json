@@ -1,0 +1,155 @@
+{
+  "name": "pl_daily_elt",
+  "properties": {
+    "description": "Daily ELT orchestration: extract -> ADLS -> COPY INTO Bronze -> dbt Silver -> dbt Gold -> dbt test. The COPY INTO step runs natively via the Snowflake linked service; extract + dbt steps call an ELT-runner HTTP endpoint (see azure/adf/README.md for how to host it).",
+    "parameters": {
+      "pipeline_date": {
+        "type": "string",
+        "defaultValue": "auto"
+      },
+      "run_mode": {
+        "type": "string",
+        "defaultValue": "incremental"
+      }
+    },
+    "activities": [
+      {
+        "name": "extract_and_upload",
+        "type": "WebActivity",
+        "description": "Run the Python extractors for the date, then upload JSON to ADLS Gen2 (extractors.run_all --upload).",
+        "policy": {
+          "timeout": "0.01:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 60
+        },
+        "typeProperties": {
+          "url": "https://<elt-runner-host>/extract",
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "date": "@pipeline().parameters.pipeline_date",
+            "mode": "@pipeline().parameters.run_mode"
+          }
+        }
+      },
+      {
+        "name": "snowflake_copy_into",
+        "type": "Script",
+        "description": "Load the staged ADLS JSON into the 5 Bronze tables via COPY INTO. Runs natively through the Snowflake linked service (LOADER role). METADATA$FILENAME populates _file_name.",
+        "linkedServiceName": {
+          "referenceName": "ls_snowflake",
+          "type": "LinkedServiceReference"
+        },
+        "dependsOn": [
+          {
+            "activity": "extract_and_upload",
+            "dependencyConditions": ["Succeeded"]
+          }
+        ],
+        "typeProperties": {
+          "scripts": [
+            {
+              "type": "Query",
+              "text": "COPY INTO MACROMARKET.BRONZE.raw_stock_prices (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/stock-prices/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';"
+            },
+            {
+              "type": "Query",
+              "text": "COPY INTO MACROMARKET.BRONZE.raw_stock_fundamentals (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/stock-fundamentals/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';"
+            },
+            {
+              "type": "Query",
+              "text": "COPY INTO MACROMARKET.BRONZE.raw_fred_series (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/fred-series/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';"
+            },
+            {
+              "type": "Query",
+              "text": "COPY INTO MACROMARKET.BRONZE.raw_crypto_prices (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/crypto-prices/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';"
+            },
+            {
+              "type": "Query",
+              "text": "COPY INTO MACROMARKET.BRONZE.raw_fear_greed (raw_data, _file_name) FROM (SELECT $1, METADATA$FILENAME FROM @MACROMARKET.BRONZE.adls_raw_stage/fear-greed/) FILE_FORMAT = (FORMAT_NAME = MACROMARKET.BRONZE.json_format) ON_ERROR = 'ABORT_STATEMENT';"
+            }
+          ]
+        }
+      },
+      {
+        "name": "dbt_run_staging",
+        "type": "WebActivity",
+        "description": "dbt run --select staging (Bronze -> Silver staging views).",
+        "policy": { "timeout": "0.01:00:00", "retry": 1, "retryIntervalInSeconds": 30 },
+        "dependsOn": [
+          { "activity": "snowflake_copy_into", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "url": "https://<elt-runner-host>/dbt",
+          "method": "POST",
+          "headers": { "Content-Type": "application/json" },
+          "body": { "command": "run", "select": "path:models/silver/staging" }
+        }
+      },
+      {
+        "name": "dbt_run_intermediate",
+        "type": "WebActivity",
+        "description": "dbt run --select intermediate (Silver enrichment tables).",
+        "policy": { "timeout": "0.01:00:00", "retry": 1, "retryIntervalInSeconds": 30 },
+        "dependsOn": [
+          { "activity": "dbt_run_staging", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "url": "https://<elt-runner-host>/dbt",
+          "method": "POST",
+          "headers": { "Content-Type": "application/json" },
+          "body": { "command": "run", "select": "path:models/silver/intermediate" }
+        }
+      },
+      {
+        "name": "dbt_run_gold",
+        "type": "WebActivity",
+        "description": "dbt run --select gold (dims + facts, incl. incremental snapshot + Python correlation model).",
+        "policy": { "timeout": "0.01:00:00", "retry": 1, "retryIntervalInSeconds": 30 },
+        "dependsOn": [
+          { "activity": "dbt_run_intermediate", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "url": "https://<elt-runner-host>/dbt",
+          "method": "POST",
+          "headers": { "Content-Type": "application/json" },
+          "body": { "command": "run", "select": "path:models/gold" }
+        }
+      },
+      {
+        "name": "dbt_test",
+        "type": "WebActivity",
+        "description": "dbt test — runs all schema + singular tests; fails the pipeline on data-quality violations.",
+        "policy": { "timeout": "0.01:00:00", "retry": 0, "retryIntervalInSeconds": 30 },
+        "dependsOn": [
+          { "activity": "dbt_run_gold", "dependencyConditions": ["Succeeded"] }
+        ],
+        "typeProperties": {
+          "url": "https://<elt-runner-host>/dbt",
+          "method": "POST",
+          "headers": { "Content-Type": "application/json" },
+          "body": { "command": "test" }
+        }
+      },
+      {
+        "name": "notify_failure",
+        "type": "WebActivity",
+        "description": "On failure of the final step, post an alert (Slack/Teams webhook). For full coverage, add failure links from each step or wrap in a parent Try/Catch pipeline.",
+        "dependsOn": [
+          { "activity": "dbt_test", "dependencyConditions": ["Failed"] }
+        ],
+        "typeProperties": {
+          "url": "https://<your-slack-or-teams-webhook>",
+          "method": "POST",
+          "headers": { "Content-Type": "application/json" },
+          "body": {
+            "text": "@concat('MacroMarket daily ELT FAILED for ', pipeline().parameters.pipeline_date, ' (run ', pipeline().RunId, ')')"
+          }
+        }
+      }
+    ],
+    "annotations": ["macromarket", "daily", "elt"]
+  }
+}

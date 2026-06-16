@@ -1,0 +1,33 @@
+{
+  "name": "tr_daily_5pm",
+  "properties": {
+    "description": "Runs pl_daily_elt every weekday at 5:00 PM Eastern (after US market close), passing the scheduled date as pipeline_date. Publish + START the trigger in ADF Studio to activate.",
+    "type": "ScheduleTrigger",
+    "runtimeState": "Stopped",
+    "typeProperties": {
+      "recurrence": {
+        "frequency": "Week",
+        "interval": 1,
+        "timeZone": "Eastern Standard Time",
+        "startTime": "2026-06-17T17:00:00",
+        "schedule": {
+          "hours": [17],
+          "minutes": [0],
+          "weekDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+        }
+      }
+    },
+    "pipelines": [
+      {
+        "pipelineReference": {
+          "referenceName": "pl_daily_elt",
+          "type": "PipelineReference"
+        },
+        "parameters": {
+          "pipeline_date": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')",
+          "run_mode": "incremental"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "ls_keyvault",
+  "properties": {
+    "type": "AzureKeyVault",
+    "description": "Connection to Azure Key Vault. Other linked services reference this to pull secrets at runtime, so no credential is stored in ADF. Grant the ADF managed identity the 'Key Vault Secrets User' role on kv-macromarket.",
+    "typeProperties": {
+      "baseUrl": "https://kv-macromarket.vault.azure.net/"
+    }
+  }
+}
