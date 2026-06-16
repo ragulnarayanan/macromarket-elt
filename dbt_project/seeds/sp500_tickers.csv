@@ -1,0 +1,11 @@
+ticker,company_name,sector
+AAPL,Apple Inc.,Technology
+MSFT,Microsoft Corporation,Technology
+NVDA,NVIDIA Corporation,Technology
+AMZN,Amazon.com Inc.,Consumer Cyclical
+GOOGL,Alphabet Inc.,Communication Services
+META,Meta Platforms Inc.,Communication Services
+TSLA,Tesla Inc.,Consumer Cyclical
+JPM,JPMorgan Chase & Co.,Financial Services
+XOM,Exxon Mobil Corporation,Energy
+JNJ,Johnson & Johnson,Healthcare

@@ -47,7 +47,7 @@ dbt Core · PySpark · FinBERT · MCP · Streamlit
 
 - [x] **Phase 1** — Foundation (Azure + Snowflake setup) ✅
 - [x] Phase 2 — Extractors + Bronze load ✅ *(verified end-to-end: extract → ADLS → COPY INTO Bronze)*
-- [ ] Phase 3 — dbt Silver
+- [x] Phase 3 — dbt Silver ✅ *(6 staging models, 3 seeds, 18 passing tests)*
 - [ ] Phase 4 — dbt Gold
 - [ ] Phase 5 — Databricks sentiment enrichment
 - [ ] Phase 6 — MCP server

@@ -1,0 +1,12 @@
+yahoo_sector,gics_sector,description
+Technology,Information Technology,"Software, hardware, semiconductors"
+Financial Services,Financials,"Banks, insurers, capital markets"
+Healthcare,Health Care,"Pharma, biotech, providers, devices"
+Consumer Cyclical,Consumer Discretionary,"Retail, autos, leisure"
+Consumer Defensive,Consumer Staples,"Food, beverage, household goods"
+Communication Services,Communication Services,"Telecom, media, interactive"
+Industrials,Industrials,"Capital goods, transport, services"
+Energy,Energy,"Oil, gas, consumable fuels"
+Basic Materials,Materials,"Chemicals, metals, mining"
+Real Estate,Real Estate,"REITs, real estate management"
+Utilities,Utilities,"Electric, gas, water utilities"

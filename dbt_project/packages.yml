@@ -1,0 +1,13 @@
+# ===========================================================================
+# packages.yml — third-party dbt packages (installed by `dbt deps`).
+#   dbt_utils         widely-used helper macros + generic tests
+#                     (e.g. unique_combination_of_columns, accepted_range).
+#   dbt_expectations  Great-Expectations-style data quality tests.
+# Installed into dbt_packages/ (gitignored).
+# ===========================================================================
+
+packages:
+  - package: dbt-labs/dbt_utils
+    version: [">=1.0.0", "<2.0.0"]
+  - package: calogica/dbt_expectations
+    version: [">=0.10.0", "<1.0.0"]

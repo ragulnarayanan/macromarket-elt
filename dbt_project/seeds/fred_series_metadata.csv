@@ -1,0 +1,11 @@
+series_id,series_name,frequency,unit,category
+DFF,Federal Funds Effective Rate,Daily,Percent,Interest Rates
+DGS10,10-Year Treasury Yield,Daily,Percent,Interest Rates
+DGS2,2-Year Treasury Yield,Daily,Percent,Interest Rates
+CPIAUCSL,Consumer Price Index,Monthly,Index 1982-1984=100,Inflation
+GDPC1,Real Gross Domestic Product,Quarterly,Billions of Chained 2017 Dollars,Growth
+UNRATE,Unemployment Rate,Monthly,Percent,Labor Market
+M2SL,M2 Money Supply,Monthly,Billions of Dollars,Money Supply
+VIXCLS,CBOE Volatility Index,Daily,Index,Volatility
+DCOILWTICO,WTI Crude Oil Price,Daily,USD per Barrel,Commodities
+DEXUSEU,USD/EUR Exchange Rate,Daily,USD per EUR,Foreign Exchange

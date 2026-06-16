@@ -1,0 +1,41 @@
+# ===========================================================================
+# profiles.yml — Snowflake connection config for dbt.
+#
+# WHY here (not ~/.dbt/): keeping it in the repo makes the project self-contained.
+# Run dbt with this file via either:
+#     cd dbt_project && dbt run --profiles-dir .
+#   or set once:  export DBT_PROFILES_DIR=$(pwd)/dbt_project
+#
+# SECRETS: account/user/password come from environment variables (your .env),
+# never hardcoded. Load them before running dbt, e.g.:
+#     set -a; source .env; set +a        # export every var in .env
+#
+# ROLE: dbt connects as TRANSFORMER (reads BRONZE, writes SILVER + GOLD) — a
+# different, more-privileged role than the extractors' LOADER.
+# ===========================================================================
+
+macromarket:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SF_ACCOUNT') }}"
+      user: "{{ env_var('SF_USER') }}"
+      password: "{{ env_var('SF_PASSWORD') }}"
+      role: TRANSFORMER
+      warehouse: TRANSFORMER_WH
+      database: MACROMARKET
+      schema: SILVER          # default schema; per-layer overrides set SILVER/GOLD
+      threads: 4              # how many models dbt builds in parallel
+
+    # CI target (used in Phase 9): builds into a throwaway database on PRs.
+    ci:
+      type: snowflake
+      account: "{{ env_var('SF_ACCOUNT') }}"
+      user: "{{ env_var('SF_USER') }}"
+      password: "{{ env_var('SF_PASSWORD') }}"
+      role: TRANSFORMER
+      warehouse: TRANSFORMER_WH
+      database: MACROMARKET_CI
+      schema: SILVER
+      threads: 4

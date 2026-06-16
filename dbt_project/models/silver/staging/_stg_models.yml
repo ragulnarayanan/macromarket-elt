@@ -1,0 +1,77 @@
+# ===========================================================================
+# _stg_models.yml — documentation + data tests for the staging models.
+#
+# Tests run as SQL in Snowflake (`dbt test`) and fail the build if violated:
+#   not_null / unique                              — column-level
+#   dbt_utils.unique_combination_of_columns        — composite key uniqueness
+#   dbt_utils.accepted_range                       — value bounds (sanity)
+# This is how we catch a broken extractor or a bad load BEFORE it reaches Gold.
+# ===========================================================================
+
+version: 2
+
+models:
+  - name: stg_yahoo__daily_prices
+    description: "Typed, deduplicated daily OHLCV per ticker."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [ticker, price_date]
+    columns:
+      - name: ticker
+        tests: [not_null]
+      - name: price_date
+        tests: [not_null]
+      - name: close_price
+        tests:
+          - dbt_utils.accepted_range: {min_value: 0, inclusive: true}
+
+  - name: stg_yahoo__fundamentals
+    description: "Typed, deduplicated company fundamentals snapshot."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [ticker, snapshot_date]
+    columns:
+      - name: ticker
+        tests: [not_null]
+      - name: snapshot_date
+        tests: [not_null]
+
+  - name: stg_fred__macro_indicators
+    description: "Typed, deduplicated FRED macro observations (value may be null)."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [series_id, observation_date]
+    columns:
+      - name: series_id
+        tests: [not_null]
+      - name: observation_date
+        tests: [not_null]
+
+  - name: stg_coingecko__crypto_prices
+    description: "Typed, deduplicated crypto daily snapshot."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [coin_id, price_date]
+    columns:
+      - name: coin_id
+        tests: [not_null]
+      - name: price_usd
+        tests:
+          - dbt_utils.accepted_range: {min_value: 0, inclusive: true}
+
+  - name: stg_alternative__fear_greed
+    description: "Typed, deduplicated Fear & Greed daily reading (0-100)."
+    columns:
+      - name: reading_date
+        tests: [not_null, unique]
+      - name: fng_value
+        tests:
+          - dbt_utils.accepted_range: {min_value: 0, max_value: 100, inclusive: true}
+
+  - name: stg_yahoo__news_headlines
+    description: "Typed, deduplicated news headlines (FinBERT input for Phase 5)."
+    columns:
+      - name: ticker
+        tests: [not_null]
+      - name: headline
+        tests: [not_null]

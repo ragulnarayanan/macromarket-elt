@@ -1,0 +1,55 @@
+# ===========================================================================
+# dbt_project.yml — the master config for the dbt project.
+#
+# WHAT: tells dbt where things live (models/seeds/macros) and how each layer
+#       should be MATERIALIZED (built) in Snowflake.
+# WHY:  materialization is the key dbt lever:
+#         view        -> a saved query, recomputed on read. Cheap, always fresh.
+#                        Right for STAGING (thin transforms over Bronze).
+#         table       -> physically built once per run. Faster to query.
+#                        Right for INTERMEDIATE + GOLD (heavier logic, read often).
+#         incremental -> table that only processes NEW rows each run.
+#                        Right for the big daily snapshot fact.
+# ===========================================================================
+
+name: 'macromarket'
+version: '1.0.0'
+config-version: 2
+
+# Which profile (in profiles.yml) holds the Snowflake connection details.
+profile: 'macromarket'
+
+# Standard dbt folder layout.
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+snapshot-paths: ["snapshots"]
+analysis-paths: ["analyses"]
+
+# Folders dbt may delete on `dbt clean`.
+clean-targets: ["target", "dbt_packages"]
+
+# --- Per-layer model configuration ---
+# Paths mirror the models/ folder tree. `+schema` is the Snowflake schema each
+# layer lands in (our generate_schema_name macro maps it to that name exactly,
+# e.g. SILVER / GOLD — not the default SILVER_silver concatenation).
+models:
+  macromarket:
+    silver:
+      staging:
+        +materialized: view          # thin VARIANT-flattening views
+        +schema: silver
+      intermediate:
+        +materialized: table         # built in Phase 4
+        +schema: silver
+    gold:
+      +materialized: table           # built in Phase 4
+      +schema: gold
+      fct_daily_market_snapshot:
+        +materialized: incremental    # only new dates each run (Phase 4)
+
+# Reference-data CSVs load into the Silver schema as tables.
+seeds:
+  macromarket:
+    +schema: silver

@@ -1,0 +1,4 @@
+# dbt for the transformation layer (Snowflake adapter).
+# Install with:  pip install -r dbt_project/requirements.txt
+dbt-core>=1.7,<2.0
+dbt-snowflake>=1.7,<2.0

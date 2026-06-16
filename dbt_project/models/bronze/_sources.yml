@@ -1,0 +1,45 @@
+# ===========================================================================
+# _sources.yml — declares the BRONZE raw tables as dbt "sources".
+#
+# WHY: a source is dbt's named handle on a table it did NOT create (our
+#      extractor-loaded Bronze tables). Models then reference them as
+#      {{ source('bronze', 'raw_stock_prices') }} instead of hardcoding
+#      MACROMARKET.BRONZE.raw_stock_prices. Benefits:
+#        • dbt tracks lineage from raw → staging → marts
+#        • one place to change if the table moves
+#        • freshness checks: alert when an extractor stops delivering data
+#
+# FRESHNESS: measured against the _loaded_at column the loader stamps.
+#   warn_after 24h / error_after 48h — daily pipeline, so >1 day = suspicious,
+#   >2 days = broken. Run with `dbt source freshness`.
+# ===========================================================================
+
+version: 2
+
+sources:
+  - name: bronze
+    database: MACROMARKET
+    schema: BRONZE
+    description: "Raw, append-only JSON landed from the extractors via COPY INTO."
+
+    # Default freshness for every table below (overridable per-table).
+    # dbt 1.11+ wants freshness/loaded_at_field under `config:`.
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 24, period: hour}
+        error_after: {count: 48, period: hour}
+
+    tables:
+      - name: raw_stock_prices
+        description: "Daily OHLCV per ticker (Yahoo Finance)."
+      - name: raw_stock_fundamentals
+        description: "Point-in-time fundamentals: market cap, P/E, sector (Yahoo)."
+      - name: raw_fred_series
+        description: "Macro indicator observations (FRED), one row per series/date."
+      - name: raw_crypto_prices
+        description: "Top-N crypto daily snapshot (CoinGecko)."
+      - name: raw_fear_greed
+        description: "CNN Fear & Greed index daily reading (alternative.me)."
+      - name: raw_news_headlines
+        description: "News headlines per ticker (Yahoo) — input to FinBERT in Phase 5."
