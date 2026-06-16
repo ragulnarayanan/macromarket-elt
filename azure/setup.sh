@@ -23,7 +23,7 @@ set -euo pipefail
 # --- Configuration (edit these once) ---------------------------------------
 RESOURCE_GROUP="rg-macromarket-elt"
 LOCATION="eastus2"                 # same region as Snowflake -> no egress fees
-STORAGE_ACCOUNT="macromarketelt"   # 3-24 chars, lowercase+digits, GLOBALLY unique
+STORAGE_ACCOUNT="macromarket"      # 3-24 chars, lowercase+digits, GLOBALLY unique
 CONTAINER="raw-data"               # the ADLS "filesystem"
 KEY_VAULT="kv-macromarket"         # GLOBALLY unique
 DATA_FACTORY="adf-macromarket"

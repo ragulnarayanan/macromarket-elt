@@ -46,10 +46,10 @@ CREATE FILE FORMAT IF NOT EXISTS MACROMARKET.BRONZE.json_format
 
 -- The pointer to your ADLS Gen2 container "raw-data".
 -- NOTE: the URL uses azure://<account>.blob.core.windows.net/<container>.
--- If you named your storage account something other than "macromarketelt",
+-- If you named your storage account something other than "macromarket",
 -- update the host below to match.
 CREATE STAGE IF NOT EXISTS MACROMARKET.BRONZE.adls_raw_stage
-  URL = 'azure://macromarketelt.blob.core.windows.net/raw-data'
+  URL = 'azure://macromarket.blob.core.windows.net/raw-data'
   CREDENTIALS = (AZURE_SAS_TOKEN = '<PASTE_YOUR_SAS_TOKEN_HERE>')  -- starts with sv=...
   FILE_FORMAT = MACROMARKET.BRONZE.json_format;
 
